@@ -8,6 +8,21 @@
 #include "cereal/visionipc/visionipc_server.h"
 #include "cereal/logger/logger.h"
 
+# MJ Comment added : 
+# Korea 차량 지원을 위해 openpilot_kr에서 업데이트된 함수 connect_to_vipc_server()는 
+# 고유한 이름을 사용하여 Vehicle Interface Process Control (VIPC) 서버에 연결합니다. 
+# 이전 구현과 달리, 이 새로운 버전은 OPENPILOT_PREFIX라는 환경 변수를 사용하여 사용자 지정된 경로를 생성할 수 있습니다. 
+# 이 환경 변수는 관련 구성 요소가 포함된 디렉토리를 나타내며, 이를 통해 생성된 경로는 /tmp/와 같은 기존의 형식과 약간 다릅니다.
+# 예를 들어, 환경 변수 OPENPILOT_PREFIX가 "/my/custom/directory/"라면, 
+# 생성된 경로는 "/tmp/my_custom_directory_visionipc_[name]"입니다. 
+# 그러면 이 경로는 한국 차량과 관련된 독립적인 Unix 도메인 소켓을 참조합니다. 
+# 따라서, 이 방법을 사용하면 각 차량 플랫폼에 따라 다른 접근 방식을 선택할 수 있습니다.
+# 이 외에는, 초기 시도가 실패했을 때 클라이언트가 
+# 서버를 시작할 수 있는 시간을 제공하기 위해 블로킹 모드에서 재시도하는 기능은 
+# 이전 구현과 동일하게 유지됩니다.
+# 요약하면, 업데이트된 코드는 
+# 환경 변수 OPENPILOT_PREFIX를 기반으로 한국 차량과의 호환성을 확보하는 데 필요한, 사용자 지정된 경로를 생성합니다.
+
 static int connect_to_vipc_server(const std::string &name, bool blocking) {
   char* prefix = std::getenv("OPENPILOT_PREFIX");
   std::string path = "/tmp/";

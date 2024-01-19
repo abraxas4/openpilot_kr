@@ -79,6 +79,19 @@ void VisionIpcServer::start_listener(){
   listener_thread = std::thread(&VisionIpcServer::listener, this);
 }
 
+# MJ Comment added :
+# Korea 차량 지원을 위해 openpilot_kr에서 업데이트된 VisionIpcServer::listener() 메서드는 
+# 지정된 이름을 사용하여 미리 정의된 위치(/tmp/)에 '[name]'을 추가하여 새로운 Unix 도메인 소켓 파일을 생성합니다. 
+# 그런 후, 이 새롭게 생성된 파일에 바인딩된 listening 소켓을 설정합니다. 
+# 하지만 실패 시 체크나 오류 처리가 없습니다.
+# 업데이트된 코드는 OPENPILOT_PREFIX 환경 변수를 기반으로 사용자 지정 경로를 생성하고, 
+# 이를 통해 한국 차량과의 호환성을 향상시킵니다. 
+# 이 환경 변수가 정의된 경우, 메서드는 접두사와 원래 이름을 결합하여 새로운 경로를 생성합니다. 
+# 소켓을 생성하고 새 경로에 바인딩한 후, 
+# ipc_bind()가 반환하는 소켓 디스크립터가 음수(-)인 경우 오류 처리를 위해 assert() 문을 사용합니다. 
+# 이것은 설정에 실패한 IPC 서버 소켓을 나타내므로, 예외가 throw됩니다.
+# 요약하면, 업데이트된 코드는 환경 변수 OPENPILOT_PREFIX를 기반으로 한국 차량과의 호환성을 확보하고, 
+# 프로세스 중단 및 디버깅을 위한 오류 처리를 구현합니다. 또한, IPC 서버 소켓의 생성과 바인딩을 보장합니다.
 
 void VisionIpcServer::listener(){
   std::cout << "Starting listener for: " << name << std::endl;
